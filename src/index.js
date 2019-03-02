@@ -35,7 +35,8 @@ class App extends Component {
             connection: false,
             conn_state: "Disconnected",
             connect_btn: "Connect",
-            host: "192.168.137.32",
+            host: "127.0.0.1",
+            // host: "192.168.137.32",
             port: "9001",
             pub_topic: "data",
             sub_topic: "data",
@@ -85,8 +86,10 @@ class App extends Component {
         var msg = r_message.payloadString;
         this.setState({rec_msg: msg_rec, sub_msg: msg})
     }
-    onConnectionLost() {
-        console.log("onConnectionLost");
+    onConnectionLost(responseObject) {
+        if (responseObject.errorCode !== 0) {
+            console.log("onConnectionLost:", responseObject.errorCode, responseObject.errorMessage);
+        }
         this.setState({connection: false, conn_state: "Connection Lost", connect_btn: "Connect"});
     }
     connect() {
@@ -136,6 +139,14 @@ class App extends Component {
         }
     }
 
+    onSubscriptionFailure(responseObject) {
+        // console.log("onSubscriptionFailure", responseObject)
+        if (responseObject.errorCode !== 0) {
+            console.log("onSubscriptionFailure:", responseObject.errorCode, responseObject.errorMessage);
+        }
+        this.setState({subscription: "Subscription failed"})
+    }
+
     handleSubscribe() {
         // console.log("handleSubscribe", this.state);
         if (!this.state.connection){
@@ -146,7 +157,7 @@ class App extends Component {
                 var options={
                     qos: parseInt(this.state.sub_qos),
                     onSuccess: () => this.setState({subscription: "Subscribed to topic \"" + this.state.sub_topic + "\"", subscribed: true, sub_btn: "Unsubscribe"}),
-                    onFailure: () => this.setState({subscription: "Subscription failed"}),
+                    onFailure: this.onSubscriptionFailure.bind(this),
                     };
                 this.mqtt.subscribe(this.state.sub_topic, options);
                 // this.setState({subscription: "Subscribed to topic \"" + this.state.sub_topic + "\"", subscribed: true, sub_btn: "Unsubscribe"})
