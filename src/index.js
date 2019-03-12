@@ -179,7 +179,7 @@ class App extends Component {
             <Container fluid>
 
             {/* ####### Connection ####### */}
-            <Card className="mt-5">
+            <Card className="mt-3">
                 <Card.Header>Connection - State: {this.state.conn_state}</Card.Header>
                 <Card.Body>
                     <Row>
