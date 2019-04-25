@@ -35,9 +35,9 @@ class App extends Component {
             connection: false,
             conn_state: "Disconnected",
             connect_btn: "Connect",
-            host: "127.0.0.1",
-            // host: "192.168.137.32",
-            port: "9001",
+            // host: "127.0.0.1",
+            host: "192.168.137.33",
+            port: "8083",
             pub_topic: "data",
             sub_topic: "data",
             pub_qos: "0",
@@ -50,18 +50,20 @@ class App extends Component {
             subscribed: false,
             sub_btn: "Subscribe",
         }
+
+        this.sub_topic = "" // save currently subscribed topic as state.sub_topic is for editing
     }
 
     componentDidMount() {
-        console.log("componentDidMount");
+        // console.log("componentDidMount");
       }
 
     componentDidUpdate() {
-        console.log("componentDidUpdate");
+        // console.log("componentDidUpdate");
     }
 
     componentWillUnmount() {
-        console.log("componentWillUnmount");
+        // console.log("componentWillUnmount");
      }
 
     //  handleOpenCloseNav() {
@@ -156,7 +158,10 @@ class App extends Component {
                 this.setState({subscription: "Subscribing"})
                 var options={
                     qos: parseInt(this.state.sub_qos),
-                    onSuccess: () => this.setState({subscription: "Subscribed to topic \"" + this.state.sub_topic + "\"", subscribed: true, sub_btn: "Unsubscribe"}),
+                    onSuccess: () => {
+                        this.sub_topic = this.state.sub_topic
+                        this.setState({subscription: "Subscribed to topic \"" + this.state.sub_topic + "\"", subscribed: true, sub_btn: "Unsubscribe"})
+                    },
                     onFailure: this.onSubscriptionFailure.bind(this),
                     };
                 this.mqtt.subscribe(this.state.sub_topic, options);
@@ -164,8 +169,9 @@ class App extends Component {
             } else {
                 var options={
                     onSuccess: () => this.setState({subscription: "Unsubscribed", subscribed: false, sub_btn: "Subscribe"}),
+                    onFailure: () => this.setState({subscription: "Unsubscription failed"})
                 };
-                this.mqtt.unsubscribe(this.state.sub_topic, options)
+                this.mqtt.unsubscribe(this.sub_topic, options)
             }
         }
     }
